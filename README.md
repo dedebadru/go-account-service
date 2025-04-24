@@ -32,6 +32,16 @@ Access the application:
 docker-compose down
 ```
 
+### Migration
+```bash
+migrate -path migrations/ -database "postgres://postgres:xxxxxxxxxxxxxx@0.0.0.0:54320/bank?search_path=account&sslmode=disable" up
+```
+
+### Rollback
+```bash
+migrate -path migrations/ -database "postgres://postgres:xxxxxxxxxxxxxx@0.0.0.0:54320/bank?search_path=account&sslmode=disable" down 1
+```
+
 ## Technologies
 - Backend: Golang, echo
 - Database: PostgreSQL
