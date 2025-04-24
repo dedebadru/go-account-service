@@ -41,7 +41,7 @@ services:
     depends_on:
       - psql
     volumes:
-      - ./db/migrations:/migrations
+      - ./migrations:/migrations
     command: [ "-path", "/migrations", "-database", "postgres://postgres:xxxxxxxxxxxxxx@psql:5432/bank?search_path=account&sslmode=disable", "up" ]
     restart: "on-failure"
     networks:
