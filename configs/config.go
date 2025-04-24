@@ -3,27 +3,28 @@ package configs
 import (
 	"flag"
 	"fmt"
-	"log"
 	"os"
+
 	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
 )
 
 type Config struct {
-	DBHost     	string
-	DBPort     	string
-	DBUser     	string
-	DBPassword 	string
-	DBName     	string
-	DBSchema   	string
-	ServiceHost	string
-	ServicePort	string
+	DBHost      string
+	DBPort      string
+	DBUser      string
+	DBPassword  string
+	DBName      string
+	DBSchema    string
+	ServiceHost string
+	ServicePort string
 }
 
-func LoadConfig() *Config {
+func LoadConfig(logger *logrus.Logger) *Config {
 	// Load .env file
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("WARNING: .env file not found, using system environment variables")
+		logger.Warn("WARNING: .env file not found, using system environment variables")
 	}
 
 	// CLI args
@@ -33,14 +34,14 @@ func LoadConfig() *Config {
 
 	// Env vars
 	return &Config{
-		DBHost:     	getEnv("DB_HOST", "localhost"),
-		DBPort:     	getEnv("DB_PORT", "5432"),
-		DBUser:     	getEnv("DB_USER", "postgres"),
-		DBPassword: 	getEnv("DB_PASSWORD", ""),
-		DBName:     	getEnv("DB_NAME", "accountdb"),
-		DBSchema:   	getEnv("DB_SCHEMA", "public"),
-		ServiceHost:	*host,
-		ServicePort:	*port,
+		DBHost:      getEnv("DB_HOST", "localhost"),
+		DBPort:      getEnv("DB_PORT", "5432"),
+		DBUser:      getEnv("DB_USER", "postgres"),
+		DBPassword:  getEnv("DB_PASSWORD", ""),
+		DBName:      getEnv("DB_NAME", "accountdb"),
+		DBSchema:    getEnv("DB_SCHEMA", "public"),
+		ServiceHost: *host,
+		ServicePort: *port,
 	}
 }
 
@@ -51,14 +52,14 @@ func getEnv(key string, fallback string) string {
 	return fallback
 }
 
-func (c *Config) DBConnection() string {
+func (config *Config) DBConnection() string {
 	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&search_path=%s",
-		c.DBUser, c.DBPassword, c.DBHost, c.DBPort, c.DBName, c.DBSchema,
+		config.DBUser, config.DBPassword, config.DBHost, config.DBPort, config.DBName, config.DBSchema,
 	)
 }
 
-func (c *Config) ServiceAddress() string {
+func (config *Config) ServiceAddress() string {
 	return fmt.Sprintf("%s:%s",
-		c.ServiceHost, c.ServicePort,
+		config.ServiceHost, config.ServicePort,
 	)
 }

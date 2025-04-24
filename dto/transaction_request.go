@@ -5,6 +5,6 @@ import (
 )
 
 type TransactionRequest struct {
-	AccountNumber string  				`json:"no_rekening" validate:"required"`
-	Amount  			decimal.Decimal `json:"nominal" validate:"required,gt=0"`
+	AccountNumber string          `json:"no_rekening" validate:"required"`
+	Amount        decimal.Decimal `json:"nominal" validate:"required,gt=0"`
 }

@@ -17,6 +17,7 @@ services:
 
   account-service:
     build: .
+    image: go-account-service
     container_name: account-service
     ports:
       - "8080:8080"

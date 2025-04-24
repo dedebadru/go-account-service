@@ -1,17 +1,17 @@
 package utils
 
 import (
-    "github.com/shopspring/decimal"
+	"github.com/shopspring/decimal"
 )
 
 func FormatDecimal(value decimal.Decimal, precision int32) decimal.Decimal {
-    return value.Round(precision)
+	return value.Round(precision)
 }
 
-func AddDecimal(a, b decimal.Decimal) decimal.Decimal {
-    return a.Add(b)
+func AddDecimal(value, enhancer decimal.Decimal) decimal.Decimal {
+	return value.Add(enhancer)
 }
 
-func SubtractDecimal(a, b decimal.Decimal) decimal.Decimal {
-    return a.Sub(b)
+func SubtractDecimal(value, reducer decimal.Decimal) decimal.Decimal {
+	return value.Sub(reducer)
 }

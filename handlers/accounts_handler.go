@@ -3,16 +3,16 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/go-account-service/utils"
-	"github.com/go-account-service/services"
 	"github.com/go-account-service/dto"
+	"github.com/go-account-service/services"
+	"github.com/go-account-service/utils"
 	"github.com/labstack/echo/v4"
 )
 
 type AccountHandler struct {
-	registrationService 	*services.RegistrationService
-	accountService 				*services.AccountService
-	transactionService 		*services.TransactionService
+	registrationService *services.RegistrationService
+	accountService      *services.AccountService
+	transactionService  *services.TransactionService
 }
 
 func NewAccountHandler(registrationService *services.RegistrationService, accountService *services.AccountService, transactionService *services.TransactionService) *AccountHandler {
@@ -26,7 +26,7 @@ func (handler *AccountHandler) CustomerRegistration(context echo.Context) error 
 	}
 
 	if err := utils.ValidateStruct(&req); err != nil {
-		return utils.BadRequestError(context, "Invalid request " + err.Error())
+		return utils.BadRequestError(context, "Invalid request "+err.Error())
 	}
 
 	accountNumber, err := handler.registrationService.RegisterCustomer(req)

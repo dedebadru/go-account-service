@@ -2,7 +2,7 @@ package services
 
 import (
 	"errors"
-	"fmt"
+
 	"github.com/go-account-service/dto"
 	"github.com/go-account-service/repositories"
 	"github.com/go-account-service/utils"
@@ -10,9 +10,9 @@ import (
 )
 
 type RegistrationService struct {
-	customerRepo	*repositories.CustomerRepository
-	accountRepo		*repositories.AccountRepository
-	logger        *logrus.Logger
+	customerRepo *repositories.CustomerRepository
+	accountRepo  *repositories.AccountRepository
+	logger       *logrus.Logger
 }
 
 func NewRegistrationService(
@@ -21,16 +21,16 @@ func NewRegistrationService(
 	logger *logrus.Logger,
 ) *RegistrationService {
 	return &RegistrationService{
-		customerRepo:    customerRepo,
-		accountRepo:     accountRepo,
-		logger:          logger,
+		customerRepo: customerRepo,
+		accountRepo:  accountRepo,
+		logger:       logger,
 	}
 }
 
-func (s *RegistrationService) RegisterCustomer(req dto.RegisterRequest) (string, error) {
-	exists, err := s.customerRepo.ExistsByIdentityNumberOrPhoneNumber(req.IdentityNumber, req.PhoneNumber)
+func (service *RegistrationService) RegisterCustomer(request dto.RegisterRequest) (string, error) {
+	exists, err := service.customerRepo.ExistsByIdentityNumberOrPhoneNumber(request.IdentityNumber, request.PhoneNumber)
 	if err != nil {
-		s.logger.Error("Failed to check existing customer: ", err)
+		service.logger.Error("Failed to check existing customer: ", err)
 		return "", errors.New("internal error")
 	}
 
@@ -38,25 +38,24 @@ func (s *RegistrationService) RegisterCustomer(req dto.RegisterRequest) (string,
 		return "", errors.New("NIK atau No HP sudah terdaftar")
 	}
 
-	customerID, err := s.customerRepo.CreateCustomer(req.Name, req.IdentityNumber, req.PhoneNumber)
+	customerID, err := service.customerRepo.CreateCustomer(request.Name, request.IdentityNumber, request.PhoneNumber)
 	if err != nil {
-		s.logger.Error("Failed to create customer: ", err)
+		service.logger.Warn("Failed to create customer: ", err)
 		return "", errors.New("gagal menyimpan data nasabah")
 	}
-	
+
 	accountNumber, err := utils.GenerateAccountNumber("10", "01")
 	if err != nil {
-		fmt.Println("Error:", err)
-	} else {
-		fmt.Println("Generated Rekening:", accountNumber)
-	}
-
-	accountID, err := s.accountRepo.CreateAccount(accountNumber, customerID)
-	if err != nil {
-		s.logger.Error("Failed to create account: ", err)
+		service.logger.Error("Failed to create accountNumber: ", err)
 		return "", errors.New("gagal membuat akun")
 	}
 
-	s.logger.Infof("Nasabah %s berhasil didaftarkan dengan rekening %s - %s", req.Name, accountNumber, accountID)
+	accountID, err := service.accountRepo.CreateAccount(accountNumber, customerID)
+	if err != nil {
+		service.logger.Error("Failed to create account: ", err)
+		return "", errors.New("gagal membuat akun")
+	}
+
+	service.logger.Infof("Nasabah %s berhasil didaftarkan dengan rekening %s - %d", request.Name, accountNumber, accountID)
 	return accountNumber, nil
 }

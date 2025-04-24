@@ -7,8 +7,8 @@ import (
 
 type Account struct {
     ID              int             `json:"id"`
-    AccountNumber   string          `json:"account_number"`
     CustomerID      int             `json:"customer_id"`
+    AccountNumber   string          `json:"account_number"`
     Balance         decimal.Decimal `json:"balance"`
     CreatedAt       time.Time       `json:"created_at"`
     UpdatedAt       time.Time       `json:"updated_at"`

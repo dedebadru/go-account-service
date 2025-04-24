@@ -2,16 +2,17 @@ package services
 
 import (
 	"errors"
+
 	"github.com/go-account-service/repositories"
 	"github.com/go-account-service/utils"
+	"github.com/shopspring/decimal"
 	"github.com/sirupsen/logrus"
-  "github.com/shopspring/decimal"
 )
 
 type TransactionService struct {
-	accountRepo		*repositories.AccountRepository
-	transactionRepo	*repositories.TransactionRepository
-	logger        *logrus.Logger
+	accountRepo     *repositories.AccountRepository
+	transactionRepo *repositories.TransactionRepository
+	logger          *logrus.Logger
 }
 
 func NewTransactionService(
@@ -26,41 +27,35 @@ func NewTransactionService(
 	}
 }
 
-func (s *TransactionService) Saving(accountNumber string, amount decimal.Decimal, transactionType string) (decimal.Decimal, error) {
+func (service *TransactionService) Saving(accountNumber string, amount decimal.Decimal, transactionType string) (decimal.Decimal, error) {
 	var newBalance decimal.Decimal
 	balance := decimal.NewFromInt(0)
-	customerID, accountID, err := s.accountRepo.GetAccountAndCustomerID(accountNumber)
+	account, err := service.accountRepo.GetAccountByAccountNumber(accountNumber)
 	if err != nil {
 		return balance, errors.New("rekening tidak ditemukan")
 	}
 
-	prevBalance, err := s.accountRepo.GetBalance(accountNumber)
-	if err != nil {
-		return balance, errors.New("gagal mendapatkan saldo")
-	}
+	if transactionType == "CREDIT" {
+		newBalance = utils.AddDecimal(account.Balance, amount)
 
-	if transactionType == "CREDIT"{
-		newBalance = utils.AddDecimal(prevBalance, amount)
-	
-	} else {	
-		if prevBalance.LessThan(amount) {
+	} else {
+		if account.Balance.LessThan(amount) {
 			return balance, errors.New("saldo tidak mencukupi")
 		}
 
-		newBalance = utils.SubtractDecimal(prevBalance, amount)
+		newBalance = utils.SubtractDecimal(account.Balance, amount)
 	}
 
-	err = s.transactionRepo.CreateTransaction(customerID, accountID, transactionType, amount)
+	err = service.transactionRepo.CreateTransaction(account.CustomerID, account.ID, transactionType, amount)
 	if err != nil {
-		s.logger.Warn("Gagal mencatat transaksi: ", err)
+		service.logger.Warn("Gagal mencatat transaksi: ", err)
 	}
 
-	err = s.accountRepo.UpdateSaldo(accountID, newBalance)
+	err = service.accountRepo.UpdateSaldo(account.ID, newBalance)
 	if err != nil {
 		return balance, errors.New("gagal menabung")
 	}
 
-	balance, _ = s.accountRepo.GetBalance(accountNumber)
-	return balance, nil
+	account, _ = service.accountRepo.GetAccountByAccountNumber(accountNumber)
+	return account.Balance, nil
 }
-
