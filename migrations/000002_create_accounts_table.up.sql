@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS accounts (
+  id SERIAL PRIMARY KEY,
+  customer_id INT NOT NULL,
+  account_number VARCHAR(15) UNIQUE NOT NULL,
+  balance DECIMAL(20, 2) DEFAULT 0.00,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_customer
+    FOREIGN KEY(customer_id)
+    REFERENCES customers(id)
+    ON DELETE CASCADE
+);

@@ -1,0 +1,56 @@
+services:
+  psql:
+    image: postgres:16
+    container_name: bank-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: xxxxxxxxxxxxxx
+      POSTGRES_DB: bank
+    ports:
+      - "54320:5432"
+    volumes:
+      - ./local/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - psql-data:/var/lib/postgresql/data
+    networks:
+      - account-network
+    restart: always
+
+  account-service:
+    build: .
+    container_name: account-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - psql
+    environment:
+      DB_HOST: psql
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: xxxxxxxxxxxxxx
+      DB_NAME: bank
+    command: ./account-service -port 8080
+    networks:
+      - account-network
+    links:
+      - psql
+    restart: always
+
+  migrate:
+    image: migrate/migrate
+    container_name: db-migrate
+    depends_on:
+      - psql
+    volumes:
+      - ./db/migrations:/migrations
+    command: [ "-path", "/migrations", "-database", "postgres://postgres:xxxxxxxxxxxxxx@psql:5432/bank?search_path=account&sslmode=disable", "up" ]
+    restart: "on-failure"
+    networks:
+      - account-network
+
+volumes:
+  psql-data:
+    name: psql-volume
+
+networks:
+  account-network:
+    name: account-network
